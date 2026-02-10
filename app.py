@@ -3,6 +3,7 @@ import joblib
 import json
 import pandas as pd
 from sklearn.metrics import classification_report
+from sklearn.datasets import load_breast_cancer
 
 st.title("Breast Cancer Classifier")
 
@@ -51,7 +52,22 @@ if file is not None:
     st.write(data.head())
 
     try:
-        predictions = model.predict(data)
+        # Load correct feature names
+        feature_names = load_breast_cancer().feature_names
+
+        # Separate target if present
+        if "target" in data.columns:
+            y_true = data["target"]
+            X_input = data.drop("target", axis=1)
+        else:
+            y_true = None
+            X_input = data
+
+        # Force correct column order
+        X_input = X_input[feature_names]
+
+        # ------------------ PREDICTION ------------------
+        predictions = model.predict(X_input)
 
         labels = ["Malignant" if p == 0 else "Benign" for p in predictions]
 
@@ -64,20 +80,17 @@ if file is not None:
         st.write(result_df)
 
         # ------------------ CLASSIFICATION REPORT ------------------
-        # NOTE: Only works if CSV contains true target column
-        if "target" in data.columns:
-            y_true = data["target"]
+        if y_true is not None:
             report = classification_report(y_true, predictions, output_dict=True)
             report_df = pd.DataFrame(report).transpose()
 
             st.subheader("Classification Report")
             st.dataframe(report_df)
-
         else:
             st.info("Upload CSV with 'target' column to see classification report.")
 
     except Exception as e:
-        st.error("Prediction failed. Ensure CSV has correct features.")
+        st.error("Prediction failed. Ensure CSV has correct Breast Cancer dataset features.")
 
 # ------------------ METRICS DISPLAY ------------------
 st.subheader("Model Evaluation Metrics")
