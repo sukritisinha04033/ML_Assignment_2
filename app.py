@@ -2,6 +2,7 @@ import streamlit as st
 import joblib
 import json
 import pandas as pd
+from sklearn.metrics import classification_report
 
 st.title("Breast Cancer Classifier")
 
@@ -49,11 +50,9 @@ if file is not None:
     st.subheader("Uploaded Data")
     st.write(data.head())
 
-    # ------------------ PREDICTION ------------------
     try:
         predictions = model.predict(data)
 
-        # Map 0/1 → Labels
         labels = ["Malignant" if p == 0 else "Benign" for p in predictions]
 
         result_df = pd.DataFrame({
@@ -63,6 +62,19 @@ if file is not None:
 
         st.subheader("Predictions")
         st.write(result_df)
+
+        # ------------------ CLASSIFICATION REPORT ------------------
+        # NOTE: Only works if CSV contains true target column
+        if "target" in data.columns:
+            y_true = data["target"]
+            report = classification_report(y_true, predictions, output_dict=True)
+            report_df = pd.DataFrame(report).transpose()
+
+            st.subheader("Classification Report")
+            st.dataframe(report_df)
+
+        else:
+            st.info("Upload CSV with 'target' column to see classification report.")
 
     except Exception as e:
         st.error("Prediction failed. Ensure CSV has correct features.")
