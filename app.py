@@ -4,8 +4,35 @@ import pandas as pd
 
 st.title("Breast Cancer Classifier")
 
-model_choice = st.selectbox("Select Model",
-["Logistic","Decision Tree","KNN"])
+model_choice = st.selectbox(
+    "Select Model",
+    [
+        "Logistic Regression",
+        "Decision Tree",
+        "KNN",
+        "Naive Bayes",
+        "Random Forest",
+        "XGBoost"
+    ]
+)
+
+if model_choice == "Logistic Regression":
+    model = joblib.load("model/logistic.pkl")
+
+elif model_choice == "Decision Tree":
+    model = joblib.load("model/dt.pkl")
+
+elif model_choice == "KNN":
+    model = joblib.load("model/knn.pkl")
+
+elif model_choice == "Naive Bayes":
+    model = joblib.load("model/nb.pkl")
+
+elif model_choice == "Random Forest":
+    model = joblib.load("model/rf.pkl")
+
+elif model_choice == "XGBoost":
+    model = joblib.load("model/xgb.pkl")
 
 file = st.file_uploader("Upload CSV")
 
