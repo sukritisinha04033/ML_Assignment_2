@@ -5,6 +5,11 @@ import pandas as pd
 
 st.title("Breast Cancer Classifier")
 
+# ------------------ LOAD METRICS ------------------
+with open("metrics.json") as f:
+    metrics_data = json.load(f)
+
+# ------------------ MODEL DROPDOWN ------------------
 model_choice = st.selectbox(
     "Select Model",
     [
@@ -17,6 +22,7 @@ model_choice = st.selectbox(
     ]
 )
 
+# ------------------ LOAD MODEL ------------------
 if model_choice == "Logistic Regression":
     model = joblib.load("model/logistic.pkl")
 
@@ -35,11 +41,28 @@ elif model_choice == "Random Forest":
 elif model_choice == "XGBoost":
     model = joblib.load("model/xgb.pkl")
 
+# ------------------ FILE UPLOAD ------------------
 file = st.file_uploader("Upload CSV")
 
-if file:
+if file is not None:
     data = pd.read_csv(file)
+    st.subheader("Uploaded Data")
     st.write(data.head())
 
-with open("metrics.json") as f:
-    metrics_data = json.load(f)
+    # ------------------ PREDICTION ------------------
+    try:
+        predictions = model.predict(data)
+        st.subheader("Predictions")
+        st.write(predictions)
+    except Exception as e:
+        st.error("Prediction failed. Ensure CSV has correct features.")
+
+# ------------------ METRICS DISPLAY ------------------
+st.subheader("Model Evaluation Metrics")
+
+if model_choice in metrics_data:
+    df_metrics = pd.DataFrame(
+        metrics_data[model_choice],
+        index=[model_choice]
+    )
+    st.dataframe(df_metrics)
