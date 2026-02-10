@@ -52,8 +52,18 @@ if file is not None:
     # ------------------ PREDICTION ------------------
     try:
         predictions = model.predict(data)
+
+        # Map 0/1 → Labels
+        labels = ["Malignant" if p == 0 else "Benign" for p in predictions]
+
+        result_df = pd.DataFrame({
+            "Prediction Code": predictions,
+            "Prediction Label": labels
+        })
+
         st.subheader("Predictions")
-        st.write(predictions)
+        st.write(result_df)
+
     except Exception as e:
         st.error("Prediction failed. Ensure CSV has correct features.")
 
